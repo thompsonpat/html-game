@@ -1,0 +1,24 @@
+{
+  "name": "html-game",
+  "version": "1.0.0",
+  "description": "Basic html game using nodejs sockio and express.",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.16.4",
+    "socket.io": "^2.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thompsonpat/html-game.git"
+  },
+  "author": "Patrick Thompson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thompsonpat/html-game/issues"
+  },
+  "homepage": "https://github.com/thompsonpat/html-game#readme"
+}
