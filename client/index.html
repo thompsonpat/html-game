@@ -1,18 +1,19 @@
+<canvas id="ctx" width="500" style="border:1px solid #000"></canvas>
+
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
-    // Connection
+    // Get Canvas
+    var ctx = document.getElementById("ctx").getContext("2d");
+    ctx.font = "30px Arial";
+
+    // Connection to server
     var socket = io();
-    var random = Math.random();
 
-    var happy = function () {
-        socket.emit('happy', {
-            reason: 'its my birthday ' + random
-        });
-    }
-
-    socket.on('serverMsg', function (data) {
-        console.log(data.msg);
+    // When receieve 'newPosition' from server
+    socket.on('newPositions', function (data) {
+        ctx.clearRect(0, 0, 500, 500);
+        for (var i = 0; i < data.length; i++) {
+            ctx.fillText(data[i].number, data[i].x, data[i].y);
+        }
     });
 </script>
-
-<button onclick="happy()">Happy</button>
