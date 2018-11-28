@@ -4,15 +4,15 @@
     var socket = io();
     var random = Math.random();
 
-    var happy = function(){
+    var happy = function () {
         socket.emit('happy', {
-            reason:'its my birthday ' + random
+            reason: 'its my birthday ' + random
         });
     }
 
-    socket.on('serverMsg', function(data){
-        console.log(data.msg); 
+    socket.on('serverMsg', function (data) {
+        console.log(data.msg);
     });
 </script>
- 
+
 <button onclick="happy()">Happy</button>
