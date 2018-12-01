@@ -162,6 +162,9 @@ Bullet.update = function () {
 	return pack;
 }
 
+// Bool to allow debug commands from chat box
+var DEBUG = true;
+
 // ================== SOCKET.io CODE ================== //
 var io = require('socket.io')(serv, {});
 
@@ -180,6 +183,22 @@ io.sockets.on('connection', function (socket) {
 	socket.on('disconnect', function () {
 		delete SOCKET_LIST[socket.id];
 		Player.onDisconnect(socket);
+	});
+
+	// When server recieves 'sendMsgToServer', send chat messages to all clients
+	socket.on('sendMsgToServer', function (data) {
+		var playerName = ("" + socket.id).slice(2, 7);
+
+		for (var i in SOCKET_LIST) {
+			SOCKET_LIST[i].emit('addToChat', playerName + ': ' + data);
+		}
+	});
+
+	// When server recieves a message it should evaluate (for debug purposes)
+	socket.on('evalServer', function (data) {
+		if (!DEBUG) return;
+		var res = eval(data);
+		socket.emit('evalAnswer', res);
 	});
 
 });

@@ -1,8 +1,17 @@
-<canvas id="ctx" width="500" height="500" style="border:1px solid #000"></canvas>
+<canvas id="ctx" width="500" height="500"></canvas>
+<div id="chat-text">
+    <div>Hello!</div>
+</div>
+<form id="chat-form">
+    <input id="chat-input" type="text">
+</form>
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
     // Get Canvas
+    var chatForm = document.getElementById("chat-form");
+    var chatText = document.getElementById("chat-text");
+    var chatInput = document.getElementById("chat-input");
     var ctx = document.getElementById("ctx").getContext("2d");
     ctx.font = "30px Arial";
 
@@ -23,6 +32,28 @@
             ctx.fillRect(data.bullet[i].x - 5, data.bullet[i].y - 5, 10, 10);
         }
     });
+
+    // When recieve 'addToChat' from server, add message to chat box
+    socket.on('addToChat', function (data) {
+        chatText.innerHTML += '<div>' + data + '</div>';
+    });
+
+    // When recieve message from server with data from command that has been evaluated (for debug purposes)
+    socket.on('evalAnswer', function(data) {
+        console.log(data);
+    });
+
+    chatForm.onsubmit = function (e) {
+        // Prevent refresh of page
+        e.preventDefault();
+
+        if (chatInput.value[0] === '/') {
+            socket.emit('evalServer', chatInput.value.slice(1));    // Evalue message
+        } else {
+            socket.emit('sendMsgToServer', chatInput.value);        // Send message
+        }
+        chatInput.value = '';
+    }
 
     // Player keyboard input
     document.onkeydown = function (event) {
@@ -46,3 +77,22 @@
             socket.emit('keypress', { inputId: 'right', state: false });
     }
 </script>
+<style>
+    #ctx {
+        border: 1px solid #000;
+    }
+
+    body {
+        background-color: #424242;
+    }
+
+    #chat-text {
+        height: 100px;
+        width: 500px;
+        overflow-y: scroll;
+    }
+
+    #chat-input {
+        width: 500px;
+    }
+</style>
