@@ -118,6 +118,50 @@ Player.update = function () {
 	return pack;
 }
 
+var Bullet = function (angle) {
+	var self = Entity();
+	self.id = Math.random();
+	self.spdX = Math.cos(angle / 180 * Math.PI) * 10;
+	self.spdY = Math.sin(angle / 180 * Math.PI) * 10;
+
+	self.timer = 0;
+	self.toRemove = false;
+	var super_update = self.update;
+	self.update = function () {
+		if (self.timer++ > 100)
+			self.toRemove = true;
+		super_update();
+	}
+	Bullet.list[self.id] = self;
+	return self;
+}
+
+Bullet.list = {};
+
+// Update all bullets
+// creates package that gets returned to setInterval (main game loop)
+Bullet.update = function () {
+	if (Math.random() < 0.1) {
+		Bullet(Math.random() * 360);
+	}
+
+	var pack = [];
+	for (var i in Bullet.list) {
+		var bullet = Bullet.list[i];
+		// Player keyboard input
+		bullet.update();
+
+		if (bullet.toRemove == true) delete Bullet.list[i];
+
+		// Create package of bullet info to send to clients
+		pack.push({
+			x: bullet.x,
+			y: bullet.y,
+		});
+	}
+	return pack;
+}
+
 // ================== SOCKET.io CODE ================== //
 var io = require('socket.io')(serv, {});
 
@@ -143,7 +187,10 @@ io.sockets.on('connection', function (socket) {
 // Main loop of the game
 // Every 40ms loop through sockets and increase x & y and send new coordinates to client
 setInterval(function () {
-	var pack = Player.update();
+	var pack = {
+		player: Player.update(),
+		bullet: Bullet.update(),
+	}
 
 	for (var i in SOCKET_LIST) {
 		var socket = SOCKET_LIST[i];
