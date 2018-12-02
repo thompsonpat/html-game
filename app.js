@@ -34,6 +34,11 @@ var Entity = function () {
 		self.y += self.spdY;
 	}
 
+	// Returns the distance between entity and given point
+	self.getDistance = function (pt) {
+		return Math.sqrt(Math.pow(self.x - pt.x, 2) + Math.pow(self.y - pt.y, 2))
+	}
+
 	return self;
 }
 
@@ -61,11 +66,13 @@ var Player = function (id) {
 
 		if (self.pressingAttack) {
 			self.shootBullet(self.mouseAngle);
+			// Shotgun effect
+			// for (var i = -3; i < 3; i++) self.shootBullet(i * 10 + self.mouseAngle)
 		}
 	}
 
 	self.shootBullet = function (angle) {
-		var b = Bullet(angle);
+		var b = Bullet(self.id, angle);
 		// Bullet originates from player's location
 		b.x = self.x;
 		b.y = self.y;
@@ -133,9 +140,10 @@ Player.update = function () {
 	return pack;
 }
 
-var Bullet = function (angle) {
+var Bullet = function (parent, angle) {
 	var self = Entity();
 	self.id = Math.random();
+	self.parent = parent;
 	self.spdX = Math.cos(angle / 180 * Math.PI) * 10;
 	self.spdY = Math.sin(angle / 180 * Math.PI) * 10;
 
@@ -146,6 +154,15 @@ var Bullet = function (angle) {
 		if (self.timer++ > 100)
 			self.toRemove = true;
 		super_update();
+
+		for (var i in Player.list) {
+			var p = Player.list[i];
+			// Check if bullet collides with any players
+			if (self.getDistance(p) < 32 && self.parent != p.id) {
+				// handle collision. ex: hp--;
+				self.toRemove = true;
+			}
+		}
 	}
 	Bullet.list[self.id] = self;
 	return self;
@@ -165,16 +182,46 @@ Bullet.update = function () {
 		if (bullet.toRemove == true) delete Bullet.list[i];
 
 		// Create package of bullet info to send to clients
-		pack.push({
-			x: bullet.x,
-			y: bullet.y,
-		});
+		else
+			pack.push({
+				x: bullet.x,
+				y: bullet.y,
+			});
 	}
 	return pack;
 }
 
 // Bool to allow debug commands from chat box
 var DEBUG = true;
+
+var USERS = {
+	// Username:Password
+	"bob": "asd",
+	"alice": "123",
+	"pat": "poop"
+}
+
+// Returns true if password matches username in USERS array
+var isValidPassword = function (data, callback) {
+	setTimeout(function () {
+		callback(USERS[data.username] === data.password);
+	}, 10);
+}
+
+// Returns if user is already in USERS array
+var isUsernameTaken = function (data, callback) {
+	setTimeout(function () {
+		callback(USERS[data.username]);
+	}, 10);
+}
+
+// Adds user to USERS array
+var addUser = function (data, callback) {
+	setTimeout(function () {
+		USERS[data.username] = data.password;
+		callback();
+	}, 10);
+}
 
 // ================== SOCKET.io CODE ================== //
 var io = require('socket.io')(serv, {});
@@ -187,7 +234,28 @@ io.sockets.on('connection', function (socket) {
 	// Socket added to list of connected sockets
 	SOCKET_LIST[socket.id] = socket;
 
-	Player.onConnect(socket);
+	socket.on('signIn', function (data) {
+		isValidPassword(data, function (result) {
+			if (result) {
+				Player.onConnect(socket);
+				socket.emit('signInResponse', { success: true });
+			} else {
+				socket.emit('signInResponse', { success: false });
+			}
+		});
+	});
+
+	socket.on('signUp', function (data) {
+		isUsernameTaken(data, function (result) {
+			if (result) {
+				socket.emit('signUpResponse', { success: false });
+			} else {
+				addUser(data, function() {
+					socket.emit('signUpResponse', { success: true });
+				});
+			}
+		});
+	});
 
 	// When player leaves, disconnect messages is automatically sent to server
 	// Remove socket and player from lists
