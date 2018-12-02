@@ -43,11 +43,13 @@ var Player = function (id) {
 	self.id = id;
 	self.number = "" + Math.floor(10 * Math.random());
 
-	// Player Keyboard Input
+	// Player Input
 	self.pressingRight = false;
 	self.pressingLeft = false;
 	self.pressingUp = false;
 	self.pressingDown = false;
+	self.pressingAttack = false;
+	self.mouseAngle = 0;
 	self.maxSpd = 10;
 
 	// Calls Entity's update()
@@ -56,6 +58,17 @@ var Player = function (id) {
 	self.update = function () {
 		self.updateSpd();
 		super_update();
+
+		if (self.pressingAttack) {
+			self.shootBullet(self.mouseAngle);
+		}
+	}
+
+	self.shootBullet = function (angle) {
+		var b = Bullet(angle);
+		// Bullet originates from player's location
+		b.x = self.x;
+		b.y = self.y;
 	}
 
 	// Override entity's updatePosition()
@@ -86,11 +99,13 @@ Player.onConnect = function (socket) {
 
 	// Adds listener for keyPress packages
 	// Player keyboard input
-	socket.on('keypress', function (data) {
+	socket.on('keyPress', function (data) {
 		if (data.inputId === 'up') player.pressingUp = data.state;
 		else if (data.inputId === 'down') player.pressingDown = data.state;
 		else if (data.inputId === 'left') player.pressingLeft = data.state;
 		else if (data.inputId === 'right') player.pressingRight = data.state;
+		else if (data.inputId === 'attack') player.pressingAttack = data.state;
+		else if (data.inputId === 'mouseAngle') player.mouseAngle = data.state;
 	});
 }
 
@@ -141,10 +156,6 @@ Bullet.list = {};
 // Update all bullets
 // creates package that gets returned to setInterval (main game loop)
 Bullet.update = function () {
-	if (Math.random() < 0.1) {
-		Bullet(Math.random() * 360);
-	}
-
 	var pack = [];
 	for (var i in Bullet.list) {
 		var bullet = Bullet.list[i];

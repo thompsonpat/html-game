@@ -39,7 +39,7 @@
     });
 
     // When recieve message from server with data from command that has been evaluated (for debug purposes)
-    socket.on('evalAnswer', function(data) {
+    socket.on('evalAnswer', function (data) {
         console.log(data);
     });
 
@@ -58,24 +58,40 @@
     // Player keyboard input
     document.onkeydown = function (event) {
         if (event.keyCode === 87)       // W
-            socket.emit('keypress', { inputId: 'up', state: true });
+            socket.emit('keyPress', { inputId: 'up', state: true });
         else if (event.keyCode === 83)  // S
-            socket.emit('keypress', { inputId: 'down', state: true });
+            socket.emit('keyPress', { inputId: 'down', state: true });
         else if (event.keyCode === 65)  // A
-            socket.emit('keypress', { inputId: 'left', state: true });
+            socket.emit('keyPress', { inputId: 'left', state: true });
         else if (event.keyCode === 68)  // D
-            socket.emit('keypress', { inputId: 'right', state: true });
+            socket.emit('keyPress', { inputId: 'right', state: true });
     }
     document.onkeyup = function (event) {
         if (event.keyCode === 87)       // W
-            socket.emit('keypress', { inputId: 'up', state: false });
+            socket.emit('keyPress', { inputId: 'up', state: false });
         else if (event.keyCode === 83)  // S
-            socket.emit('keypress', { inputId: 'down', state: false });
+            socket.emit('keyPress', { inputId: 'down', state: false });
         else if (event.keyCode === 65)  // A
-            socket.emit('keypress', { inputId: 'left', state: false });
+            socket.emit('keyPress', { inputId: 'left', state: false });
         else if (event.keyCode === 68)  // D
-            socket.emit('keypress', { inputId: 'right', state: false });
+            socket.emit('keyPress', { inputId: 'right', state: false });
     }
+
+    // Player mouse input
+    document.onmousedown = function (event) {
+        socket.emit('keyPress', { inputId: 'attack', state: true });
+    }
+    document.onmouseup = function (event) {
+        socket.emit('keyPress', { inputId: 'attack', state: false });
+    }
+    document.onmousemove = function (event) {
+        // Extract x and y relative to the middle of the screen (250 gets to middle)
+        var x = -250 + event.clientX - 8;
+        var y = -250 + event.clientY - 8;
+        var angle = Math.atan2(y, x) / Math.PI * 180;
+        socket.emit('keyPress', { inputId: 'mouseAngle', state: angle });
+    }
+
 </script>
 <style>
     #ctx {
