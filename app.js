@@ -1,3 +1,8 @@
+var mongojs = require('mongojs');
+var db = mongojs('localhost:27017/myGame', ['account', 'progress']);
+
+
+
 // ================== EXPRESS CODE (FILE TRANSFER) ================== //
 var express = require('express');
 var app = express();
@@ -203,24 +208,29 @@ var USERS = {
 
 // Returns true if password matches username in USERS array
 var isValidPassword = function (data, callback) {
-	setTimeout(function () {
-		callback(USERS[data.username] === data.password);
-	}, 10);
+	db.account.find({username: data.username, password: data.password}, function (err, res) {
+		if (res.length > 0)
+			callback(true);
+		else
+			callback(false);
+	});
 }
 
 // Returns if user is already in USERS array
 var isUsernameTaken = function (data, callback) {
-	setTimeout(function () {
-		callback(USERS[data.username]);
-	}, 10);
+	db.account.find({username: data.username}, function (err, res) {
+		if (res.length > 0)
+			callback(true);
+		else
+			callback(false);
+	});
 }
 
 // Adds user to USERS array
 var addUser = function (data, callback) {
-	setTimeout(function () {
-		USERS[data.username] = data.password;
+	db.account.insert({username: data.username, password: data.password}, function (err) {
 		callback();
-	}, 10);
+	});
 }
 
 // ================== SOCKET.io CODE ================== //
