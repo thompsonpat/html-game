@@ -17,6 +17,10 @@
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
+
+    var WIDTH = 500;
+    var HEIGHT = 500;
+
     // Connection to server
     var socket = io();
 
@@ -123,16 +127,20 @@
         self.kills = initPack.kills;
 
         self.draw = function () {
-            // ctx.fillText(self.number, self.x, self.y);
+            // Draw relative to player
+            var x = self.x - Player.list[selfId].x + WIDTH / 2;
+            var y = self.y - Player.list[selfId].y + HEIGHT / 2;
 
             // Health Bar
             var hpWidth = 30 * self.hp / self.hpMax;
             ctx.fillStyle = 'red';
-            ctx. fillRect(self.x - hpWidth / 2, self.y - 40, hpWidth, 4);
+            ctx. fillRect(x - hpWidth / 2, y - 40, hpWidth, 4);
 
             var width = Img.player.width * 2;
             var height = Img.player.height * 2;
-            ctx.drawImage(Img.player, 0, 0, Img.player.width, Img.player.height, self.x - width / 2, self.y - height / 2, width, height);
+
+
+            ctx.drawImage(Img.player, 0, 0, Img.player.width, Img.player.height, x - width / 2, y - height / 2, width, height);
 
             // Kill Count
             //ctx.fillText(self.kills, self.x, self.y - 60);
@@ -150,7 +158,12 @@
         self.draw = function () {
             var width = Img.player.width / 2;
             var height = Img.player.height / 2;
-            ctx.drawImage(Img.bullet, 0, 0, Img.bullet.width, Img.bullet.height, self.x - width / 2, self.y - height / 2, width, height);
+
+            // Draw relative to player
+            var x = self.x - Player.list[selfId].x + WIDTH / 2;
+            var y = self.y - Player.list[selfId].y + HEIGHT / 2;
+
+            ctx.drawImage(Img.bullet, 0, 0, Img.bullet.width, Img.bullet.height, x - width / 2, y - height / 2, width, height);
         };
 
         Bullet.list[self.id] = self;
@@ -216,6 +229,8 @@
 
     // Main game loop
     setInterval(function () {
+        // Until initPack is recieved, don't do anything
+        if (!selfId) return;
         // Clear Screen
         ctx.clearRect(0, 0, 500, 500);
         // Draw map
@@ -229,7 +244,11 @@
     }, 40); // 25 times a second
 
     var drawMap = function () {
-        ctx.drawImage(Img.map, 0, 0);
+        // Draw relative to player position
+        var x = WIDTH / 2 - Player.list[selfId].x;
+        var y = HEIGHT / 2 - Player.list[selfId].y;
+
+        ctx.drawImage(Img.map, x, y);
     }
 
     var drawKills = function () {
