@@ -62,6 +62,10 @@ var Player = function (id) {
 	self.mouseAngle = 0;
 	self.maxSpd = 10;
 
+	self.hp = 10;
+	self.hpMax = 10;
+	self.kills = 0;
+
 	// Calls Entity's update()
 	var super_update = self.update;
 
@@ -101,14 +105,19 @@ var Player = function (id) {
 			id: self.id,
 			x: self.x,
 			y: self.y,
-			number: self.number
+			number: self.number,
+			hp: self.hp,
+			hpMax: self.hpMax,
+			kills: self.kills
 		};
 	}
 	self.getUpdatePack = function () {
 		return {
 			id: self.id,
 			x: self.x,
-			y: self.y
+			y: self.y,
+			hp: self.hp,
+			kills: self.kills
 		};
 	}
 
@@ -199,7 +208,18 @@ var Bullet = function (parent, angle) {
 			var p = Player.list[i];
 			// Check if bullet collides with any players
 			if (self.getDistance(p) < 32 && self.parent != p.id) {
-				// handle collision. ex: hp--;
+				// handle collision
+				p.hp -= 1;
+
+				// If killed
+				if (p.hp <= 0) {
+					var shooter = Player.list[self.parent];
+					if (shooter) shooter.kills += 1;	// If shooter still connected
+					p.hp = p.hpMax;
+					p.x = Math.random() * 500;
+					p.y = Math.random() * 500;
+				}
+
 				self.toRemove = true;
 			}
 		}

@@ -110,6 +110,21 @@
         self.number = initPack.number;
         self.x = initPack.x;
         self.y = initPack.y;
+        self.hp = initPack.hp;
+        self.hpMax = initPack.hpMax;
+        self.kills = initPack.kills;
+
+        self.draw = function () {
+            ctx.fillText(self.number, self.x, self.y);
+
+            // Health Bar
+            var hpWidth = 30 * self.hp / self.hpMax;
+            ctx. fillRect(self.x - hpWidth / 2, self.y - 40, hpWidth, 4);
+
+            // Kill Count
+            ctx.fillText(self.kills, self.x, self.y - 60);
+        };
+
         Player.list[self.id] = self;
     }
 
@@ -118,6 +133,11 @@
         self.id = initPack.id;
         self.x = initPack.x;
         self.y = initPack.y;
+
+        self.draw = function () {
+            ctx.fillRect(self.x - 5, self.y - 5, 10, 10);
+        };
+
         Bullet.list[self.id] = self;
     }
 
@@ -147,6 +167,8 @@
             if (p) {
                 if (pack.x !== undefined) p.x = pack.x;
                 if (pack.y !== undefined) p.y = pack.y;
+                if (pack.hp !== undefined) p.hp = pack.hp;
+                if (pack.kills !== undefined) p.kills = pack.kills;
             }
         }
 
@@ -174,13 +196,13 @@
         }
     })
 
-    setInterval(function() {
+    setInterval(function () {
         // Clear Screen
         ctx.clearRect(0, 0, 500, 500);
         // Draw Players
-        for (var i in Player.list) ctx.fillText(Player.list[i].number, Player.list[i].x, Player.list[i].y);
+        for (var i in Player.list) Player.list[i].draw();
         // Draw Bullets
-        for (var i in Bullet.list) ctx.fillRect(Bullet.list[i].x - 5, Bullet.list[i].y - 5, 10, 10);
+        for (var i in Bullet.list) Bullet.list[i].draw();
     }, 40); // 25 times a second
 
     // Player keyboard input
