@@ -96,16 +96,27 @@ var Player = function (id) {
 		else self.spdX = 0;
 	}
 
+	self.getInitPack = function () {
+		return {
+			id: self.id,
+			x: self.x,
+			y: self.y,
+			number: self.number
+		};
+	}
+	self.getUpdatePack = function () {
+		return {
+			id: self.id,
+			x: self.x,
+			y: self.y
+		};
+	}
+
 	// Add player to list of players
 	Player.list[id] = self;
 
 	// Add player info to initPack to send to client
-	initPack.player.push({
-		id: self.id,
-		x: self.x,
-		y: self.y,
-		number: self.number
-	});
+	initPack.player.push(self.getInitPack());
 
 	return self;
 }
@@ -127,6 +138,25 @@ Player.onConnect = function (socket) {
 		else if (data.inputId === 'attack') player.pressingAttack = data.state;
 		else if (data.inputId === 'mouseAngle') player.mouseAngle = data.state;
 	});
+
+	var bullets = [];
+	for (var i in Player.list) {
+		bullets.push(Player.list[i].getInitPack());
+	}
+
+	socket.emit('init', {
+		player: Player.getAllInitPack(),
+		bullet: Bullet.getAllInitPack()
+	});
+}
+
+// Return initPack data for all players
+Player.getAllInitPack = function () {
+	var players = [];
+	for (var i in Player.list) {
+		players.push(Player.list[i].getInitPack());
+	}
+	return players;
 }
 
 // Called when player disconnects
@@ -145,11 +175,7 @@ Player.update = function () {
 		// Player keyboard input
 		player.update();
 		// Create package of player info to send to clients
-		pack.push({
-			id: player.id,
-			x: player.x,
-			y: player.y,
-		});
+		pack.push(player.getUpdatePack());
 	}
 	return pack;
 }
@@ -178,12 +204,28 @@ var Bullet = function (parent, angle) {
 			}
 		}
 	}
+
+	self.getInitPack = function () {
+		return {
+			id: self.id,
+			x: self.x,
+			y: self.y
+		}
+	}
+
+	self.getUpdatePack = function () {
+		return {
+			id: self.id,
+			x: self.x,
+			y: self.y
+		}
+	}
+
 	Bullet.list[self.id] = self;
-	initPack.bullet.push({
-		id: self.id,
-		x: self.x,
-		y: self.y
-	});
+
+	// Add bullet info to initPack to send to client
+	initPack.bullet.push(self.getInitPack());
+
 	return self;
 }
 
@@ -206,13 +248,18 @@ Bullet.update = function () {
 
 		// Create package of bullet info to send to clients
 		else
-			pack.push({
-				id: bullet.id,
-				x: bullet.x,
-				y: bullet.y,
-			});
+			pack.push(bullet.getUpdatePack());
 	}
 	return pack;
+}
+
+// Return initPack data for all bullets
+Bullet.getAllInitPack = function () {
+	var bullets = [];
+	for (var i in Bullet.list) {
+		bullets.push(Bullet.list[i].getInitPack());
+	}
+	return bullets;
 }
 
 // Bool to allow debug commands from chat box
