@@ -99,6 +99,14 @@ var Player = function (id) {
 	// Add player to list of players
 	Player.list[id] = self;
 
+	// Add player info to initPack to send to client
+	initPack.player.push({
+		id: self.id,
+		x: self.x,
+		y: self.y,
+		number: self.number
+	});
+
 	return self;
 }
 
@@ -125,6 +133,7 @@ Player.onConnect = function (socket) {
 // remove player from player list
 Player.onDisconnect = function (socket) {
 	delete Player.list[socket.id];
+	removePack.player.push(socket.id);
 }
 
 // Update all players
@@ -137,9 +146,9 @@ Player.update = function () {
 		player.update();
 		// Create package of player info to send to clients
 		pack.push({
+			id: player.id,
 			x: player.x,
 			y: player.y,
-			number: player.number
 		});
 	}
 	return pack;
@@ -170,6 +179,11 @@ var Bullet = function (parent, angle) {
 		}
 	}
 	Bullet.list[self.id] = self;
+	initPack.bullet.push({
+		id: self.id,
+		x: self.x,
+		y: self.y
+	});
 	return self;
 }
 
@@ -184,11 +198,16 @@ Bullet.update = function () {
 		// Player keyboard input
 		bullet.update();
 
-		if (bullet.toRemove == true) delete Bullet.list[i];
+		if (bullet.toRemove == true) {
+			delete Bullet.list[i];
+			// Add bullet id to removePack to be removed from client list of bullets
+			removePack.bullet.push(bullet.id);
+		}
 
 		// Create package of bullet info to send to clients
 		else
 			pack.push({
+				id: bullet.id,
 				x: bullet.x,
 				y: bullet.y,
 			});
@@ -208,7 +227,7 @@ var USERS = {
 
 // Returns true if password matches username in USERS array
 var isValidPassword = function (data, callback) {
-	db.account.find({username: data.username, password: data.password}, function (err, res) {
+	db.account.find({ username: data.username, password: data.password }, function (err, res) {
 		if (res.length > 0)
 			callback(true);
 		else
@@ -218,7 +237,7 @@ var isValidPassword = function (data, callback) {
 
 // Returns if user is already in USERS array
 var isUsernameTaken = function (data, callback) {
-	db.account.find({username: data.username}, function (err, res) {
+	db.account.find({ username: data.username }, function (err, res) {
 		if (res.length > 0)
 			callback(true);
 		else
@@ -228,7 +247,7 @@ var isUsernameTaken = function (data, callback) {
 
 // Adds user to USERS array
 var addUser = function (data, callback) {
-	db.account.insert({username: data.username, password: data.password}, function (err) {
+	db.account.insert({ username: data.username, password: data.password }, function (err) {
 		callback();
 	});
 }
@@ -260,7 +279,7 @@ io.sockets.on('connection', function (socket) {
 			if (result) {
 				socket.emit('signUpResponse', { success: false });
 			} else {
-				addUser(data, function() {
+				addUser(data, function () {
 					socket.emit('signUpResponse', { success: true });
 				});
 			}
@@ -292,6 +311,16 @@ io.sockets.on('connection', function (socket) {
 
 });
 
+var initPack = {
+	player: [],
+	bullet: []
+};
+
+var removePack = {
+	player: [],
+	bullet: []
+}
+
 // Main loop of the game
 // Every 40ms loop through sockets and increase x & y and send new coordinates to client
 setInterval(function () {
@@ -303,8 +332,15 @@ setInterval(function () {
 	for (var i in SOCKET_LIST) {
 		var socket = SOCKET_LIST[i];
 
-		// Set new positions to players
-		socket.emit('newPositions', pack);
+		socket.emit('init', initPack);
+		socket.emit('update', pack);
+		socket.emit('remove', removePack);
 	}
+
+	// Reset packages
+	initPack.player = [];
+	initPack.bullet = [];
+	removePack.player = [];
+	removePack.bullet = [];
 
 }, 1000 / 25);

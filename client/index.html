@@ -20,7 +20,9 @@
     // Connection to server
     var socket = io();
 
-    // ========== Login System ========== //
+    // =============================================================== //
+    //                       LOGIN SYSTEM [START]                      //
+    // =============================================================== //
     var signInContainer = document.getElementById("signInContainer");
     var usernameField = document.getElementById("usernameField");
     var passwordField = document.getElementById("passwordField");
@@ -51,29 +53,18 @@
             alert("Sign up unsuccessful.");
         }
     });
+    // =============================================================== //
+    //                       LOGIN SYSTEM [END]                        //
+    // =============================================================== //
 
-    // ========== Game ========== //
-    // Get Canvas
+    // =============================================================== //
+    //                       CHAT SYSTEM [START]                       //
+    // =============================================================== //
+
+    // Chat
     var chatForm = document.getElementById("chat-form");
     var chatText = document.getElementById("chat-text");
     var chatInput = document.getElementById("chat-input");
-    var ctx = document.getElementById("ctx").getContext("2d");
-    ctx.font = "30px Arial";
-
-    // When receieve 'newPosition' from server
-    socket.on('newPositions', function (data) {
-        ctx.clearRect(0, 0, 500, 500);
-
-        // Player data
-        for (var i = 0; i < data.player.length; i++) {
-            ctx.fillText(data.player[i].number, data.player[i].x, data.player[i].y);
-        }
-
-        // Bullet data
-        for (var i = 0; i < data.bullet.length; i++) {
-            ctx.fillRect(data.bullet[i].x - 5, data.bullet[i].y - 5, 10, 10);
-        }
-    });
 
     // When recieve 'addToChat' from server, add message to chat box
     socket.on('addToChat', function (data) {
@@ -94,8 +85,103 @@
         } else {
             socket.emit('sendMsgToServer', chatInput.value);        // Send message
         }
+        // Clear text field
         chatInput.value = '';
     }
+
+    // =============================================================== //
+    //                       CHAT SYSTEM [END]                         //
+    // =============================================================== //
+
+    // =============================================================== //
+    //                         GAME [START]                            //
+    // =============================================================== //
+
+    // Canvas
+    var ctx = document.getElementById("ctx").getContext("2d");
+    ctx.font = "30px Arial";
+
+    // Init Package
+    // when new stuff created, contains all the data
+    // Ex. 'init' package: { player: [{id: 123, number: '1', x: 0, y: 0}, {id: 1, number: '2', x: 0, y: 0}], bullet: [] }
+    var Player = function (initPack) {
+        var self = {};
+        self.id = initPack.id;
+        self.number = initPack.number;
+        self.x = initPack.x;
+        self.y = initPack.y;
+        Player.list[self.id] = self;
+    }
+
+    var Bullet = function (initPack) {
+        var self = {};
+        self.id = initPack.id;
+        self.x = initPack.x;
+        self.y = initPack.y;
+        Bullet.list[self.id] = self;
+    }
+
+    socket.on('init', function (data) {
+        // Create Players
+        for (var i = 0; i < data.player.length; i++) {
+            new Player(data.player[i]);
+        }
+        // Create Bullets
+        for (var i = 0; i < data.bullet.length; i++) {
+            new Bullet(data.bullet[i]);
+        }
+    });
+
+    Player.list = {};
+    Bullet.list = {};
+
+
+    // Update Package
+    // data that has changed
+    // Ex. 'update' package: { player: [{id: 123, x: 0, y: 0}, {id: 1, x: 0, y: 0}], bullet: [] }
+    socket.on('update', function (data) {
+        // Update player info
+        for (var i = 0; i < data.player.length; i++) {
+            var pack = data.player[i];
+            var p = Player.list[pack.id];
+            if (p) {
+                if (pack.x !== undefined) p.x = pack.x;
+                if (pack.y !== undefined) p.y = pack.y;
+            }
+        }
+
+        // Update bullet info
+        for (var i = 0; i < data.bullet.length; i++) {
+            var pack = data.bullet[i];
+            var b = Bullet.list[data.bullet[i].id];
+            if (b) {
+                if (pack.x !== undefined) b.x = pack.x;
+                if (pack.y !== undefined) b.y = pack.y;
+            }
+        }
+    });
+
+
+    // Remove Package
+    // package of ids to remove
+    // Ex. 'remove' package: { player: [12323], bullet: [12323, 123123] }
+    socket.on('remove', function (data) {
+        for (var i = 0; i < data.player.length; i++) {
+            delete Player.list[data.player[i]];
+        }
+        for (var i = 0; i < data.bullet.length; i++) {
+            delete Bullet.list[data.bullet[i]];
+        }
+    })
+
+    setInterval(function() {
+        // Clear Screen
+        ctx.clearRect(0, 0, 500, 500);
+        // Draw Players
+        for (var i in Player.list) ctx.fillText(Player.list[i].number, Player.list[i].x, Player.list[i].y);
+        // Draw Bullets
+        for (var i in Bullet.list) ctx.fillRect(Bullet.list[i].x - 5, Bullet.list[i].y - 5, 10, 10);
+    }, 40); // 25 times a second
 
     // Player keyboard input
     document.onkeydown = function (event) {
@@ -133,6 +219,10 @@
         var angle = Math.atan2(y, x) / Math.PI * 180;
         socket.emit('keyPress', { inputId: 'mouseAngle', state: angle });
     }
+
+    // =============================================================== //
+    //                           GAME [END]                            //
+    // =============================================================== //
 
 </script>
 <style>
