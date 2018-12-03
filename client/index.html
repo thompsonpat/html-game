@@ -97,6 +97,14 @@
     //                         GAME [START]                            //
     // =============================================================== //
 
+    var Img = {};
+    Img.player = new Image();
+    Img.bullet = new Image();
+    Img.map = new Image();
+    Img.player.src = '/client/img/player.png';
+    Img.bullet.src = '/client/img/bullet.png';
+    Img.map.src = '/client/img/map.png';
+
     // Canvas
     var ctx = document.getElementById("ctx").getContext("2d");
     ctx.font = "30px Arial";
@@ -119,10 +127,15 @@
 
             // Health Bar
             var hpWidth = 30 * self.hp / self.hpMax;
+            ctx.fillStyle = 'red';
             ctx. fillRect(self.x - hpWidth / 2, self.y - 40, hpWidth, 4);
 
+            var width = Img.player.width * 2;
+            var height = Img.player.height * 2;
+            ctx.drawImage(Img.player, 0, 0, Img.player.width, Img.player.height, self.x - width / 2, self.y - height / 2, width, height);
+
             // Kill Count
-            ctx.fillText(self.kills, self.x, self.y - 60);
+            //ctx.fillText(self.kills, self.x, self.y - 60);
         };
 
         Player.list[self.id] = self;
@@ -135,7 +148,9 @@
         self.y = initPack.y;
 
         self.draw = function () {
-            ctx.fillRect(self.x - 5, self.y - 5, 10, 10);
+            var width = Img.player.width / 2;
+            var height = Img.player.height / 2;
+            ctx.drawImage(Img.bullet, 0, 0, Img.bullet.width, Img.bullet.height, self.x - width / 2, self.y - height / 2, width, height);
         };
 
         Bullet.list[self.id] = self;
@@ -196,14 +211,21 @@
         }
     })
 
+    // Main game loop
     setInterval(function () {
         // Clear Screen
         ctx.clearRect(0, 0, 500, 500);
+        // Draw map
+        drawMap();
         // Draw Players
         for (var i in Player.list) Player.list[i].draw();
         // Draw Bullets
         for (var i in Bullet.list) Bullet.list[i].draw();
     }, 40); // 25 times a second
+
+    var drawMap = function () {
+        ctx.drawImage(Img.map, 0, 0);
+    }
 
     // Player keyboard input
     document.onkeydown = function (event) {
