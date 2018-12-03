@@ -123,7 +123,7 @@
         self.kills = initPack.kills;
 
         self.draw = function () {
-            ctx.fillText(self.number, self.x, self.y);
+            // ctx.fillText(self.number, self.x, self.y);
 
             // Health Bar
             var hpWidth = 30 * self.hp / self.hpMax;
@@ -156,7 +156,10 @@
         Bullet.list[self.id] = self;
     }
 
+    var selfId = null;
+
     socket.on('init', function (data) {
+        if (data.selfId) selfId = data.selfId;
         // Create Players
         for (var i = 0; i < data.player.length; i++) {
             new Player(data.player[i]);
@@ -217,6 +220,8 @@
         ctx.clearRect(0, 0, 500, 500);
         // Draw map
         drawMap();
+        // Draw kills
+        drawKills();
         // Draw Players
         for (var i in Player.list) Player.list[i].draw();
         // Draw Bullets
@@ -225,6 +230,11 @@
 
     var drawMap = function () {
         ctx.drawImage(Img.map, 0, 0);
+    }
+
+    var drawKills = function () {
+        ctx.fillStyle = 'white';
+        ctx.fillText(Player.list[selfId].kills, 0, 30);
     }
 
     // Player keyboard input
