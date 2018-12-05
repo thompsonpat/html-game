@@ -1,5 +1,6 @@
-var mongojs = require('mongojs');
-var db = mongojs('localhost:27017/myGame', ['account', 'progress']);
+// var mongojs = require('mongojs');
+// var db = mongojs('localhost:27017/myGame', ['account', 'progress']);
+var db = null;
 
 
 
@@ -20,13 +21,21 @@ console.log('Server started.');
 
 var SOCKET_LIST = {};
 
-var Entity = function () {
+var Entity = function (param) {
 	var self = {
 		x: 250,
 		y: 250,
 		spdX: 0,
 		spdY: 0,
 		id: "",
+		map: 'forest',
+	}
+
+	if (param) {
+		if (param.x) self.x = param.x;
+		if (param.y) self.y = param.y;
+		if (param.map) self.map = param.map;
+		if (param.id) self.id = param.id;
 	}
 
 	self.update = function () {
@@ -48,9 +57,8 @@ var Entity = function () {
 }
 
 // Player Object
-var Player = function (id) {
-	var self = Entity();
-	self.id = id;
+var Player = function (param) {
+	var self = Entity(param);	// Super constructor
 	self.number = "" + Math.floor(10 * Math.random());
 
 	// Player Input
@@ -81,10 +89,12 @@ var Player = function (id) {
 	}
 
 	self.shootBullet = function (angle) {
-		var b = Bullet(self.id, angle);
-		// Bullet originates from player's location
-		b.x = self.x;
-		b.y = self.y;
+		Bullet({
+			parent: self.id,
+			angle: angle,
+			x: self.x,	// Bullet originates from player's location
+			y: self.y
+		});
 	}
 
 	// Override entity's updatePosition()
@@ -135,7 +145,7 @@ Player.list = {};
 
 // Creates new player depending on socket.id
 Player.onConnect = function (socket) {
-	var player = Player(socket.id);
+	var player = Player({ id: socket.id });
 
 	// Adds listener for keyPress packages
 	// Player keyboard input
@@ -190,12 +200,13 @@ Player.update = function () {
 	return pack;
 }
 
-var Bullet = function (parent, angle) {
-	var self = Entity();
+var Bullet = function (param) {
+	var self = Entity(param);	// Super constructor
 	self.id = Math.random();
-	self.parent = parent;
-	self.spdX = Math.cos(angle / 180 * Math.PI) * 10;
-	self.spdY = Math.sin(angle / 180 * Math.PI) * 10;
+	self.angle = param.angle;
+	self.spdX = Math.cos(param.angle / 180 * Math.PI) * 10;
+	self.spdY = Math.sin(param.angle / 180 * Math.PI) * 10;
+	self.parent = param.parent;
 
 	self.timer = 0;
 	self.toRemove = false;
