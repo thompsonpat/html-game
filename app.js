@@ -1,7 +1,5 @@
-// var mongojs = require('mongojs');
-// var db = mongojs('localhost:27017/myGame', ['account', 'progress']);
-var db = null;
-
+var mongojs = require('mongojs');
+var db = mongojs('localhost:27017/myGame', ['account', 'progress']);
 
 
 // ================== EXPRESS CODE (FILE TRANSFER) ================== //
@@ -93,7 +91,8 @@ var Player = function (param) {
 			parent: self.id,
 			angle: angle,
 			x: self.x,	// Bullet originates from player's location
-			y: self.y
+			y: self.y,
+			map: self.map,
 		});
 	}
 
@@ -118,7 +117,8 @@ var Player = function (param) {
 			number: self.number,
 			hp: self.hp,
 			hpMax: self.hpMax,
-			kills: self.kills
+			kills: self.kills,
+			map: self.map,
 		};
 	}
 	self.getUpdatePack = function () {
@@ -132,7 +132,7 @@ var Player = function (param) {
 	}
 
 	// Add player to list of players
-	Player.list[id] = self;
+	Player.list[self.id] = self;
 
 	// Add player info to initPack to send to client
 	initPack.player.push(self.getInitPack());
@@ -145,7 +145,13 @@ Player.list = {};
 
 // Creates new player depending on socket.id
 Player.onConnect = function (socket) {
-	var player = Player({ id: socket.id });
+	var map = 'forest';
+	if (Math.random() < 0.5) map = 'field';
+
+	var player = Player({
+		id: socket.id,
+		map: map,
+	});
 
 	// Adds listener for keyPress packages
 	// Player keyboard input
@@ -219,7 +225,7 @@ var Bullet = function (param) {
 		for (var i in Player.list) {
 			var p = Player.list[i];
 			// Check if bullet collides with any players
-			if (self.getDistance(p) < 32 && self.parent != p.id) {
+			if (self.map === p.map && self.getDistance(p) < 32 && self.parent != p.id) {
 				// handle collision
 				p.hp -= 1;
 
@@ -241,7 +247,8 @@ var Bullet = function (param) {
 		return {
 			id: self.id,
 			x: self.x,
-			y: self.y
+			y: self.y,
+			map: self.map,
 		}
 	}
 
