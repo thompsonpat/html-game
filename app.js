@@ -146,7 +146,7 @@ Player.list = {};
 // Creates new player depending on socket.id
 Player.onConnect = function (socket) {
 	var map = 'forest';
-	if (Math.random() < 0.5) map = 'field';
+	// if (Math.random() < 0.5) map = 'field';
 
 	var player = Player({
 		id: socket.id,

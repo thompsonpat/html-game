@@ -1,12 +1,13 @@
 <div id="signInContainer">
-    Username: <input id="usernameField" type="text"></input><br />
-    Password: <input id="passwordField" type="text"></input>
+    Username: <input id="usernameField" type="text" value="pat"></input><br />
+    Password: <input id="passwordField" type="text" value="poop"></input>
     <button id="signInBtn">Sign In</button>
     <button id="signUpBtn">Sign Up</button>
 </div>
 
 <div id="gameContainer">
     <canvas id="ctx" width="500" height="500"></canvas>
+    <canvas id="ctx-ui" width="500" height="500"></canvas>
     <div id="chat-text">
         <div>Hello!</div>
     </div>
@@ -116,7 +117,9 @@
 
     // Canvas
     var ctx = document.getElementById("ctx").getContext("2d");
+    var ctxUi = document.getElementById("ctx-ui").getContext("2d");
     ctx.font = "30px Arial";
+    ctxUi.font = "30px Arial";
 
     // Init Package
     // when new stuff created, contains all the data
@@ -266,9 +269,13 @@
     }
 
     var drawKills = function () {
-        ctx.fillStyle = 'white';
-        ctx.fillText(Player.list[selfId].kills, 0, 30);
+        if (lastKills === Player.list[selfId].kills) return;
+        lastKills = Player.list[selfId].kills;
+        ctxUi.clearRect(0, 0, 500, 500);
+        ctxUi.fillStyle = 'white';
+        ctxUi.fillText(Player.list[selfId].kills, 10, 30);
     }
+    var lastKills = null;
 
     // Player keyboard input
     document.onkeydown = function (event) {
@@ -319,6 +326,16 @@
 
     #ctx {
         border: 1px solid #000;
+        /* left: 8px; */
+        /* top: 8px; */
+        /* position: absolute; */
+    }
+
+    #ctx-ui {
+        border: 1px solid #000;
+        left: 8px;
+        top: 8px;
+        position: absolute;
     }
 
     body {
