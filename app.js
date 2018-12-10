@@ -127,7 +127,8 @@ var Player = function (param) {
 			x: self.x,
 			y: self.y,
 			hp: self.hp,
-			kills: self.kills
+			kills: self.kills,
+			map: self.map,
 		};
 	}
 
@@ -162,6 +163,11 @@ Player.onConnect = function (socket) {
 		else if (data.inputId === 'right') player.pressingRight = data.state;
 		else if (data.inputId === 'attack') player.pressingAttack = data.state;
 		else if (data.inputId === 'mouseAngle') player.mouseAngle = data.state;
+	});
+
+	socket.on('changeMap', function (data) {
+		if (player.map === 'field') player.map = 'forest';
+		else player.map = 'field';
 	});
 
 	var bullets = [];

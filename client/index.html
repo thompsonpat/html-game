@@ -6,14 +6,21 @@
 </div>
 
 <div id="gameContainer">
-    <canvas id="ctx" width="500" height="500"></canvas>
-    <canvas id="ctx-ui" width="500" height="500"></canvas>
-    <div id="chat-text">
-        <div>Hello!</div>
+    <div id="game">
+        <canvas id="ctx" width="500" height="500"></canvas>
+        <canvas id="ctx-ui" width="500" height="500"></canvas>
+        <div id="ui">
+            <button onclick="changeMap()" style="position: absolute; bottom: 0px; left: 0px;">Change Map</button>
+        </div>
     </div>
-    <form id="chat-form">
-        <input id="chat-input" type="text">
-    </form>
+    <div id="belowGame">
+        <div id="chat-text">
+            <div>Hello!</div>
+        </div>
+        <form id="chat-form">
+            <input id="chat-input" type="text">
+        </form>
+    </div>
 </div>
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
@@ -99,6 +106,18 @@
     // =============================================================== //
 
     // =============================================================== //
+    //                          UI [START]                             //
+    // =============================================================== //
+
+    var changeMap = function () {
+        socket.emit('changeMap');
+    }
+
+    // =============================================================== //
+    //                           UI [END]                              //
+    // =============================================================== //
+
+    // =============================================================== //
     //                         GAME [START]                            //
     // =============================================================== //
 
@@ -138,7 +157,7 @@
         self.draw = function () {
             // Only draw on same map
             if (Player.list[selfId].map !== self.map) return;
-            
+
             // Draw relative to player
             var x = self.x - Player.list[selfId].x + WIDTH / 2;
             var y = self.y - Player.list[selfId].y + HEIGHT / 2;
@@ -216,6 +235,7 @@
                 if (pack.y !== undefined) p.y = pack.y;
                 if (pack.hp !== undefined) p.hp = pack.hp;
                 if (pack.kills !== undefined) p.kills = pack.kills;
+                if (pack.map !== undefined) p.map = pack.map;
             }
         }
 
@@ -322,6 +342,19 @@
 <style>
     #gameContainer {
         display: none;
+    }
+
+    #game {
+        height: 500px;
+        width: 500px;
+    }
+
+    #ui {
+        border: 1px solid #000;
+        height: 500px;
+        width: 500px;
+        position: absolute;
+        top: 8px;
     }
 
     #ctx {
