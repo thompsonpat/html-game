@@ -1,4 +1,4 @@
-var USE_DATABASE = true;
+var USE_DATABASE = false;
 var mongojs = USE_DATABASE ? require('mongojs') : null;
 var db = USE_DATABASE ? mongojs('localhost:27017/myGame', ['account', 'progress']) : null;
 

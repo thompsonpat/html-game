@@ -17,7 +17,7 @@ Entity = function (param) {
         spdX: 0,
         spdY: 0,
         id: "",
-        map: 'forest',
+        map: 'field',
     }
 
     if (param) {
@@ -162,7 +162,7 @@ Player.list = {};
 
 // Creates new player depending on socket.id
 Player.onConnect = function (socket, username, progress) {
-    var map = 'forest';
+    var map = 'field';
     // if (Math.random() < 0.5) map = 'field';
 
     var player = Player({
