@@ -66,7 +66,6 @@ Entity.getFrameUpdateData = function () {
     return pack;
 }
 
-// Player Object
 Player = function (param) {
     var self = Entity(param);	// Super constructor
     self.number = "" + Math.floor(10 * Math.random());
@@ -84,6 +83,7 @@ Player = function (param) {
     self.hp = 10;
     self.hpMax = 10;
     self.kills = 0;
+    self.inventory = new Inventory(param.socket);
 
     // Calls Entity's update()
     var super_update = self.update;
@@ -166,6 +166,7 @@ Player.onConnect = function (socket, username) {
         username: username,
         id: socket.id,
         map: map,
+        socket: socket,
     });
 
     // Adds listener for keyPress packages

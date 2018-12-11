@@ -2,6 +2,7 @@ var mongojs = require('mongojs');
 var db = mongojs('localhost:27017/myGame', ['account', 'progress']);
 
 require('./Entity');
+require('./client/Inventory');
 
 // ================== EXPRESS CODE (FILE TRANSFER) ================== //
 var express = require('express');
@@ -17,10 +18,7 @@ app.use('/client', express.static(__dirname + '/client'));
 serv.listen(2000);
 console.log('Server started.');
 
-
 var SOCKET_LIST = {};
-
-
 
 // Bool to allow debug commands from chat box
 var DEBUG = true;

@@ -17,13 +17,16 @@
         <div id="chat-text">
             <div>Hello!</div>
         </div>
+        <div id="inventory"></div>
         <form id="chat-form">
             <input id="chat-input" type="text">
         </form>
     </div>
 </div>
 
-<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<!-- <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script> -->
+<script src="/client/socket.js"></script>
+<script src="/client/Inventory.js"></script>
 <script>
 
     var WIDTH = 500;
@@ -118,6 +121,14 @@
     var changeMap = function () {
         socket.emit('changeMap');
     }
+
+    // Null lets us know whether on client or server
+    var inventory = new Inventory(null);
+
+    socket.on('updateInventory', function (items) {
+        inventory.items = items;
+        inventory.refreshRender();
+    });
 
     // =============================================================== //
     //                           UI [END]                              //
