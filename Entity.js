@@ -85,7 +85,7 @@ Player = function (param) {
     self.hp = 10;
     self.hpMax = 10;
     self.kills = 0;
-    self.inventory = new Inventory(param.socket, true);
+    self.inventory = new Inventory(param.progress.items, param.socket, true);
 
     // Calls Entity's update()
     var super_update = self.update;
@@ -161,7 +161,7 @@ Player = function (param) {
 Player.list = {};
 
 // Creates new player depending on socket.id
-Player.onConnect = function (socket, username) {
+Player.onConnect = function (socket, username, progress) {
     var map = 'forest';
     // if (Math.random() < 0.5) map = 'field';
 
@@ -170,7 +170,11 @@ Player.onConnect = function (socket, username) {
         id: socket.id,
         map: map,
         socket: socket,
+        progress: progress,
     });
+
+    // When player connects, make sure they have proper inventory
+    player.inventory.refreshRender();
 
     // Adds listener for keyPress packages
     // Player keyboard input
@@ -236,6 +240,15 @@ Player.getAllInitPack = function () {
 // Called when player disconnects
 // remove player from player list
 Player.onDisconnect = function (socket) {
+    let player = Player.list[socket.id];
+    if (!player) return;
+
+    // Save player progress
+    Database.savePlayerProgress({
+        username: player.username,
+        items: player.inventory.items,
+    });
+    
     delete Player.list[socket.id];
     removePack.player.push(socket.id);
 }

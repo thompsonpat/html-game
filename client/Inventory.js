@@ -1,6 +1,6 @@
-Inventory = function (socket, server) {
+Inventory = function (items, socket, server) {
 	var self = {
-		items: [], // { id:"itemId", amount:1 }
+		items: items, // { id:"itemId", amount:1 }
 		socket: socket,
 		server: server,
 	}

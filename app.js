@@ -1,6 +1,4 @@
-var mongojs = require('mongojs');
-var db = mongojs('localhost:27017/myGame', ['account', 'progress']);
-
+require('./Database')
 require('./Entity');
 require('./client/Inventory');
 
@@ -23,33 +21,6 @@ console.log('Server started.');
 // Bool to allow debug commands from chat box
 var DEBUG = true;
 
-// Returns true if password matches username in database
-var isValidPassword = function (data, callback) {
-	db.account.find({ username: data.username, password: data.password }, function (err, res) {
-		if (res.length > 0)
-			callback(true);
-		else
-			callback(false);
-	});
-}
-
-// Returns if user is already in database
-var isUsernameTaken = function (data, callback) {
-	db.account.find({ username: data.username }, function (err, res) {
-		if (res.length > 0)
-			callback(true);
-		else
-			callback(false);
-	});
-}
-
-// Adds user to database
-var addUser = function (data, callback) {
-	db.account.insert({ username: data.username, password: data.password }, function (err) {
-		callback();
-	});
-}
-
 // ================== SOCKET.io CODE ================== //
 var io = require('socket.io')(serv, {});
 
@@ -62,41 +33,40 @@ io.sockets.on('connection', function (socket) {
 	SOCKET_LIST[socket.id] = socket;
 
 	socket.on('signIn', function (data) { // data: {username, password}
-		isValidPassword(data, function (result) {
-			if (result) {
-				Player.onConnect(socket, data.username);
+		Database.isValidPassword(data, function (result) {
+			if (!result) return socket.emit('signInResponse', { success: false });
+			Database.getPlayerProgress(data.username, function(progress) {
+				Player.onConnect(socket, data.username, progress);
 				socket.emit('signInResponse', { success: true });
-			} else {
-				socket.emit('signInResponse', { success: false });
-			}
+			});
 		});
-	});
+});
 
-	socket.on('signUp', function (data) {
-		isUsernameTaken(data, function (result) {
-			if (result) {
-				socket.emit('signUpResponse', { success: false });
-			} else {
-				addUser(data, function () {
-					socket.emit('signUpResponse', { success: true });
-				});
-			}
-		});
+socket.on('signUp', function (data) {
+	Database.isUsernameTaken(data, function (result) {
+		if (result) {
+			socket.emit('signUpResponse', { success: false });
+		} else {
+			Database.addUser(data, function () {
+				socket.emit('signUpResponse', { success: true });
+			});
+		}
 	});
+});
 
-	// When player leaves, disconnect messages is automatically sent to server
-	// Remove socket and player from lists
-	socket.on('disconnect', function () {
-		delete SOCKET_LIST[socket.id];
-		Player.onDisconnect(socket);
-	});
+// When player leaves, disconnect messages is automatically sent to server
+// Remove socket and player from lists
+socket.on('disconnect', function () {
+	delete SOCKET_LIST[socket.id];
+	Player.onDisconnect(socket);
+});
 
-	// When server recieves a message it should evaluate (for debug purposes)
-	socket.on('evalServer', function (data) {
-		if (!DEBUG) return;
-		var res = eval(data);
-		socket.emit('evalAnswer', res);
-	});
+// When server recieves a message it should evaluate (for debug purposes)
+socket.on('evalServer', function (data) {
+	if (!DEBUG) return;
+	var res = eval(data);
+	socket.emit('evalAnswer', res);
+});
 
 });
 
