@@ -122,8 +122,7 @@
         socket.emit('changeMap');
     }
 
-    // Null lets us know whether on client or server
-    var inventory = new Inventory(null);
+    var inventory = new Inventory(socket, false);
 
     socket.on('updateInventory', function (items) {
         inventory.items = items;

@@ -18,19 +18,12 @@ app.use('/client', express.static(__dirname + '/client'));
 serv.listen(2000);
 console.log('Server started.');
 
-var SOCKET_LIST = {};
+// var SOCKET_LIST = {};
 
 // Bool to allow debug commands from chat box
 var DEBUG = true;
 
-var USERS = {
-	// Username:Password
-	"bob": "asd",
-	"alice": "123",
-	"pat": "poop"
-}
-
-// Returns true if password matches username in USERS array
+// Returns true if password matches username in database
 var isValidPassword = function (data, callback) {
 	db.account.find({ username: data.username, password: data.password }, function (err, res) {
 		if (res.length > 0)
@@ -40,7 +33,7 @@ var isValidPassword = function (data, callback) {
 	});
 }
 
-// Returns if user is already in USERS array
+// Returns if user is already in database
 var isUsernameTaken = function (data, callback) {
 	db.account.find({ username: data.username }, function (err, res) {
 		if (res.length > 0)
@@ -50,7 +43,7 @@ var isUsernameTaken = function (data, callback) {
 	});
 }
 
-// Adds user to USERS array
+// Adds user to database
 var addUser = function (data, callback) {
 	db.account.insert({ username: data.username, password: data.password }, function (err) {
 		callback();

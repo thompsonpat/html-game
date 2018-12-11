@@ -8,6 +8,8 @@ var removePack = {
     bullet: []
 }
 
+SOCKET_LIST = {};
+
 Entity = function (param) {
     var self = {
         x: 250,
@@ -83,7 +85,7 @@ Player = function (param) {
     self.hp = 10;
     self.hpMax = 10;
     self.kills = 0;
-    self.inventory = new Inventory(param.socket);
+    self.inventory = new Inventory(param.socket, true);
 
     // Calls Entity's update()
     var super_update = self.update;
@@ -100,6 +102,7 @@ Player = function (param) {
     }
 
     self.shootBullet = function (angle) {
+        if (Math.random() < 0.1) self.inventory.addItem("ammo", 1);
         Bullet({
             parent: self.id,
             angle: angle,
