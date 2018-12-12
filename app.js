@@ -16,7 +16,7 @@ app.use('/client', express.static(__dirname + '/client'));
 serv.listen(2000);
 console.log('Server started.');
 
-// var SOCKET_LIST = {};
+var SOCKET_LIST = {};
 
 // Bool to allow debug commands from chat box
 var DEBUG = true;
@@ -35,38 +35,38 @@ io.sockets.on('connection', function (socket) {
 	socket.on('signIn', function (data) { // data: {username, password}
 		Database.isValidPassword(data, function (result) {
 			if (!result) return socket.emit('signInResponse', { success: false });
-			Database.getPlayerProgress(data.username, function(progress) {
+			Database.getPlayerProgress(data.username, function (progress) {
 				Player.onConnect(socket, data.username, progress);
 				socket.emit('signInResponse', { success: true });
 			});
 		});
-});
-
-socket.on('signUp', function (data) {
-	Database.isUsernameTaken(data, function (result) {
-		if (result) {
-			socket.emit('signUpResponse', { success: false });
-		} else {
-			Database.addUser(data, function () {
-				socket.emit('signUpResponse', { success: true });
-			});
-		}
 	});
-});
 
-// When player leaves, disconnect messages is automatically sent to server
-// Remove socket and player from lists
-socket.on('disconnect', function () {
-	delete SOCKET_LIST[socket.id];
-	Player.onDisconnect(socket);
-});
+	socket.on('signUp', function (data) {
+		Database.isUsernameTaken(data, function (result) {
+			if (result) {
+				socket.emit('signUpResponse', { success: false });
+			} else {
+				Database.addUser(data, function () {
+					socket.emit('signUpResponse', { success: true });
+				});
+			}
+		});
+	});
 
-// When server recieves a message it should evaluate (for debug purposes)
-socket.on('evalServer', function (data) {
-	if (!DEBUG) return;
-	var res = eval(data);
-	socket.emit('evalAnswer', res);
-});
+	// When player leaves, disconnect messages is automatically sent to server
+	// Remove socket and player from lists
+	socket.on('disconnect', function () {
+		delete SOCKET_LIST[socket.id];
+		Player.onDisconnect(socket);
+	});
+
+	// When server recieves a message it should evaluate (for debug purposes)
+	socket.on('evalServer', function (data) {
+		if (!DEBUG) return;
+		var res = eval(data);
+		socket.emit('evalAnswer', res);
+	});
 
 });
 

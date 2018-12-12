@@ -86,6 +86,7 @@ Item = function (id, name, event) {
 	Item.list[self.id] = self;
 	return self;
 }
+
 Item.list = {};
 
 Item("ammo", "Ammo", function (player) {
@@ -99,8 +100,3 @@ Item("grenade", "Grenade", function (player) {
 		player.shootBullet(i);
 	}
 });
-
-
-
-
-

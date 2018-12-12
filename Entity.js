@@ -8,8 +8,6 @@ var removePack = {
     bullet: []
 }
 
-SOCKET_LIST = {};
-
 Entity = function (param) {
     var self = {
         x: 250,
@@ -191,11 +189,6 @@ Player.onConnect = function (socket, username, progress) {
         if (player.map === 'field') player.map = 'forest';
         else player.map = 'field';
     });
-
-    var bullets = [];
-    for (var i in Player.list) {
-        bullets.push(Player.list[i].getInitPack());
-    }
 
     // When server recieves 'sendMsgToServer', send chat messages to all clients
     socket.on('sendMsgToServer', function (data) {
