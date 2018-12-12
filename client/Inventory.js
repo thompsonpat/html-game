@@ -40,7 +40,6 @@ Inventory = function (items, socket, server) {
 			self.socket.emit('updateInventory', self.items);
 			return;
 		}
-
 		// client only
 		var inventory = document.getElementById("inventory");
 		inventory.innerHTML = "";
@@ -48,13 +47,13 @@ Inventory = function (items, socket, server) {
 		var addButton = function (data) {
 			let item = Item.list[data.id];
 			let button = document.createElement("button");
+			button.classList.add("item");
 			button.onclick = function () {
 				self.socket.emit("useItem", item.id);
 			}
 			button.innerText = item.name + " x" + data.amount;
 			inventory.appendChild(button);
 		}
-
 		for (var i = 0; i < self.items.length; i++) {
 			addButton(self.items[i]);
 		}

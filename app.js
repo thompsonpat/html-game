@@ -16,7 +16,7 @@ app.use('/client', express.static(__dirname + '/client'));
 serv.listen(2000);
 console.log('Server started.');
 
-var SOCKET_LIST = {};
+// var SOCKET_LIST = {};
 
 // Bool to allow debug commands from chat box
 var DEBUG = true;

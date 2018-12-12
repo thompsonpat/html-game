@@ -8,6 +8,8 @@ var removePack = {
     bullet: []
 }
 
+SOCKET_LIST = {};
+
 Entity = function (param) {
     var self = {
         x: 250,

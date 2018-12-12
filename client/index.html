@@ -10,7 +10,7 @@
         <canvas id="ctx" width="500" height="500"></canvas>
         <canvas id="ctx-ui" width="500" height="500"></canvas>
         <div id="ui">
-            <button onclick="changeMap()" style="position: absolute; bottom: 0px; left: 0px;">Change Map</button>
+            <button id="changeMap" onclick="changeMap()" style="position: absolute; bottom: 0px; left: 0px;">Change Map</button>
         </div>
     </div>
     <div id="belowGame">
@@ -404,6 +404,20 @@
         position: absolute;
     }
 
+    .item {
+        background-color: #ff6600;
+        border-color: transparent;
+        color: #FFF;
+        font-weight: bold;
+    }
+
+    #changeMap {
+        background-color: #ff0066;
+        border-color: transparent;
+        color: #FFF;
+        font-weight: bold;
+    }
+
     body {
         background-color: #424242;
     }
@@ -412,6 +426,11 @@
         height: 100px;
         width: 500px;
         overflow-y: scroll;
+    }
+
+    #chat-text > div {
+        color: #FFF;
+        font-weight: bold;
     }
 
     #chat-input {
