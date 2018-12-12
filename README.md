@@ -24,6 +24,7 @@ Basic html game with using NodeJS, Socket.io, Express and MongoDB.
 - Map collision
 - Map move to TileMap system (current .PNG)
 - Proper hosting
+- Momentum based movement
 
 ## Resources Used
 - [Tutorial Series by Rainingchain for HTML Game Infrastructure](https://youtu.be/PfSwUOBL1YQ)
