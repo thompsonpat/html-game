@@ -281,7 +281,7 @@ Bullet = function (param) {
         for (var i in Player.list) {
             var p = Player.list[i];
             // Check if bullet collides with any players
-            if (self.map === p.map && self.getDistance(p) < 32 && self.parent != p.id) {
+            if (self.map === p.map && self.getDistance(p) < 20 && self.parent != p.id) {
                 // handle collision
                 p.hp -= 1;
 
