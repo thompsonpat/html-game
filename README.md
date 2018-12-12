@@ -1,4 +1,4 @@
-# html-game
+# Multiplayer HTML Game
 Basic html game with using NodeJS, Socket.io, Express and MongoDB.
 
 ## Technologies Implemented
