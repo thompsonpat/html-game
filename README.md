@@ -26,5 +26,5 @@ Basic html game with using NodeJS, Socket.io, Express and MongoDB.
 ## Resources Used
 - [Tutorial Series by Rainingchain for HTML Game Infrastructure](https://youtu.be/PfSwUOBL1YQ)
 - ["Tiled" Map Creator](https://www.mapeditor.org/)
-- [GPG Tileset](https://opengameart.org/content/rpg-pack-base-set)
+- [RPG Tileset](https://opengameart.org/content/rpg-pack-base-set)
 - [Top-Down Player Sprite](https://opengameart.org/content/animated-top-down-survivor-player)
