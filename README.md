@@ -14,6 +14,7 @@ Basic html game with using NodeJS, Socket.io, Express and MongoDB.
 - Private messages "@recipientUser,message"
 - Chat Debugging "/Bullet.list"
 - Save player progress on exit
+- Multiple maps (different collision & render layers)
 
 ## Features to be Added
 - Circle
